@@ -1,6 +1,14 @@
 import React, { Component } from "react";
 import axios from "axios";
 
+class Leaderboard extends React.Component{
+
+  render(){
+    return(<div>LEADERBOARD</div>);
+
+  }
+}
+
 class Word extends React.Component {
   constructor(props) {
     super(props);
@@ -137,31 +145,22 @@ class App extends Component {
     this.setState({index: this.state.index+1})
   }
   
-  renderFlashcards = () => {
+  //Do I need this method or can it just be in Render?
+  renderFlashcard = () => {
 
-    const newFlashcards = this.state.flashcardList;    
-    let displayedCard = [];
 
-    console.log('hello');
+    let newFlashcards = this.state.flashcardList;  
+    let index = this.state.index
+    let currentCard = newFlashcards[index];
 
-    for(let i = 0; i< newFlashcards.length; i++){
-      if(i == this.state.index){
-        //this.setState({currentCard: newFlashcards[i]});
-        displayedCard.push(newFlashcards[i]);
-      }
-    }
-    return displayedCard.map((card) => (
-      <li key={card.id}>
-        <Card index={this.handleIndex} flashcard={card} />
+
+    return (
+      <li key={currentCard.id}>
+        <Card index={this.handleIndex} flashcard={currentCard} />        
       </li>
-    ));
-    
-    
+    );
 
-  };
-
-
-  
+  };  
 
   componentDidMount() {
     this.refreshList();
@@ -176,9 +175,14 @@ class App extends Component {
   };
 
   render() {
+
+    if(this.state.flashcardList.length == 0){
+      return null;
+    }
     return (
       <main className="container">
-        <ul>{this.renderFlashcards()}</ul>
+        <ul>{this.renderFlashcard()}</ul>
+        <Leaderboard flashcardList={this.state.flashcardList}/>
       </main>
     );
   }
