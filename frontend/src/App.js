@@ -3,8 +3,17 @@ import axios from "axios";
 
 class Leaderboard extends React.Component{
 
+  renderList(){
+    let list =  this.props.flashcardList.filter(item => item.incorrect_tally > 0);
+    
+    return list.map((card) => <li key={card.id}>{card.word}  {card.incorrect_tally}</li>)
+    
+  }
+
   render(){
-    return(<div>LEADERBOARD</div>);
+    return(<div>LEADERBOARD<ul>{this.renderList()}</ul></div>
+            
+    );
 
   }
 }
@@ -86,6 +95,8 @@ class Card extends React.Component {
 
   handleUserResponse(MorF) {
     this.setState({ answerGiven: true, userResponse: MorF });
+    this.props.userResponse(MorF == this.state.answer)
+
   }
 
   handleNextClicked(){
@@ -135,14 +146,25 @@ class App extends Component {
     super(props);
     this.state = {
       flashcardList: [],
-      currentCard: null, 
       index: 0,
     };
     this.handleIndex = this.handleIndex.bind(this);
+    this.handleUserResponse = this.handleUserResponse.bind(this);
   }
 
   handleIndex(){
+    //this.setState correct_tally here
     this.setState({index: this.state.index+1})
+  }
+  handleUserResponse(correct){
+    let list = this.state.flashcardList
+    
+    if(correct){
+      list[this.state.index].correct_tally = list[this.state.index].correct_tally + 1
+    }
+    else{
+      list[this.state.index].incorrect_tally = list[this.state.index].incorrect_tally + 1
+    }
   }
   
   //Do I need this method or can it just be in Render?
@@ -156,7 +178,7 @@ class App extends Component {
 
     return (
       <li key={currentCard.id}>
-        <Card index={this.handleIndex} flashcard={currentCard} />        
+        <Card index={this.handleIndex} flashcard={currentCard} userResponse={this.handleUserResponse} />        
       </li>
     );
 
