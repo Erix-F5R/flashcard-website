@@ -142,7 +142,7 @@ class App extends Component {
     const newFlashcards = this.state.flashcardList;    
     let displayedCard = [];
 
-
+    console.log('hello');
 
     for(let i = 0; i< newFlashcards.length; i++){
       if(i == this.state.index){
