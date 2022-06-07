@@ -17,7 +17,7 @@ class Word extends React.Component {
   }
 }
 
-class Gender extends React.Component {
+class GenderButton extends React.Component {
   constructor(props) {
     super(props);
     this.handleClick = this.handleClick.bind(this);
@@ -30,7 +30,7 @@ class Gender extends React.Component {
   render() {
     return (
       <button
-        className="gender"
+        className="gender-button"
         onClick={this.handleClick}
         disabled={this.props.answerGiven}
       >
@@ -40,19 +40,49 @@ class Gender extends React.Component {
   }
 }
 
+class NextButton extends React.Component{
+  constructor(props) {
+    super(props);
+    this.handleClick = this.handleClick.bind(this);
+  }
+
+  handleClick(e) {
+    this.props.nextClicked(!this.props.nextClicked);
+  }
+  render() {
+    return (
+      <button
+        className="next-button"
+        onClick={this.handleClick}
+        disabled={!this.props.answerGiven}
+      >
+        Next
+      </button>
+    );
+  }
+
+
+}
+
 class Card extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       userResponse: null,
-      answer: "F",
+      answer: this.props.flashcard.gender,
       answerGiven: false,
     };
     this.handleUserResponse = this.handleUserResponse.bind(this);
+    this.handleNextClicked = this.handleNextClicked.bind(this);
   }
 
   handleUserResponse(MorF) {
     this.setState({ answerGiven: true, userResponse: MorF });
+  }
+
+  handleNextClicked(){
+    this.setState({ answerGiven: false, userResponse: null });
+    this.props.index()
   }
 
   render() {
@@ -73,14 +103,18 @@ class Card extends React.Component {
           flashcard={this.props.flashcard}
         />
         {result}
-        <Gender
-          gender="M"
+        <GenderButton
+          gender="m"
           userResponse={this.handleUserResponse}
           answerGiven={this.state.answerGiven}
         />
-        <Gender
-          gender="F"
+        <GenderButton
+          gender="f"
           userResponse={this.handleUserResponse}
+          answerGiven={this.state.answerGiven}
+        />
+        <NextButton
+          nextClicked={this.handleNextClicked}
           answerGiven={this.state.answerGiven}
         />
       </div>
@@ -93,18 +127,41 @@ class App extends Component {
     super(props);
     this.state = {
       flashcardList: [],
+      currentCard: null, 
+      index: 0,
     };
+    this.handleIndex = this.handleIndex.bind(this);
   }
 
+  handleIndex(){
+    this.setState({index: this.state.index+1})
+  }
+  
   renderFlashcards = () => {
-    const newFlashcards = this.state.flashcardList;
 
-    return newFlashcards.map((card) => (
+    const newFlashcards = this.state.flashcardList;    
+    let displayedCard = [];
+
+
+
+    for(let i = 0; i< newFlashcards.length; i++){
+      if(i == this.state.index){
+        //this.setState({currentCard: newFlashcards[i]});
+        displayedCard.push(newFlashcards[i]);
+      }
+    }
+    return displayedCard.map((card) => (
       <li key={card.id}>
-        <Card flashcard={card} />
+        <Card index={this.handleIndex} flashcard={card} />
       </li>
     ));
+    
+    
+
   };
+
+
+  
 
   componentDidMount() {
     this.refreshList();
