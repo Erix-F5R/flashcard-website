@@ -157,14 +157,20 @@ class App extends Component {
     this.setState({index: this.state.index+1})
   }
   handleUserResponse(correct){
-    let list = this.state.flashcardList
+    let card = this.state.flashcardList[this.state.index]
     
     if(correct){
-      list[this.state.index].correct_tally = list[this.state.index].correct_tally + 1
+      card.correct_tally = card.correct_tally + 1  
     }
     else{
-      list[this.state.index].incorrect_tally = list[this.state.index].incorrect_tally + 1
+      card.incorrect_tally = card.incorrect_tally + 1
     }
+    axios
+        .put(`/api/flashcards/${card.id}/`, card)
+        .then((res) => this.refreshList());
+        //let flashcardList = await this.refreshList();
+        //window.localStorage.setItem('deck',JSON.stringify(flashcardList)) //set Deck to local Strg
+        //this.setState({flashcardList})
   }
   
   //Do I need this method or can it just be in Render?
@@ -184,21 +190,33 @@ class App extends Component {
 
   };  
 
-  componentDidMount() {
-    this.refreshList();
+  async componentDidMount() {
+
+    let localDeck = window.localStorage.getItem('deck')    
+
+    //if No deck in local
+    if( localDeck === null){
+      let flashcardList = await this.refreshList();
+      window.localStorage.setItem('deck',JSON.stringify(flashcardList)) //set Deck to local Strg
+      this.setState({flashcardList})
+    }
+    //if deck exists
+    else{
+      this.setState({flashcardList: JSON.parse(localDeck)})//setState(flashcardList: local) 
+    }
+    
   }
 
-  refreshList = () => {
+  refreshList = async () => {
     //axios is just fetch()
-    axios
+    return axios
       .get("/api/flashcards/")
-      .then((res) => this.setState({ flashcardList: res.data }))
+      .then((res) => res.data)
       .catch((err) => console.log(err));
   };
 
   render() {
-
-    if(this.state.flashcardList.length == 0){
+    if(this.state.flashcardList.length === 0){
       return null;
     }
     return (
@@ -211,3 +229,4 @@ class App extends Component {
 }
 
 export default App;
+//<Leaderboard flashcardList={this.state.flashcardList}/>

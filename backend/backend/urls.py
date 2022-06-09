@@ -20,6 +20,7 @@ from flashcard import views
 
 router = routers.DefaultRouter()
 router.register(r'flashcards', views.FlashcardView, 'flashcard')
+#router.register(r'tally', views.Tallyview, 'tally')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
