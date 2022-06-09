@@ -154,16 +154,17 @@ class App extends Component {
 
   //onclick next
   handleIndex(){
-    
-
     //this.setState correct_tally here
-    this.setState({index: this.state.index+1})
+    let flashcardList = this.state.flashcardList
+    flashcardList.shift()
+    window.localStorage.setItem('deck',JSON.stringify(this.state.flashcardList))
+    
   }
 
   //onclick masc or fem
   handleUserResponse(correct){
     
-    let card = this.state.flashcardList[this.state.index]
+    let card = this.state.flashcardList[0]
     
     if(correct){
       card.correct_tally = card.correct_tally + 1  
@@ -185,9 +186,8 @@ class App extends Component {
   renderFlashcard = () => {
 
 
-    let newFlashcards = this.state.flashcardList;  
-    let index = this.state.index
-    let currentCard = newFlashcards[index];
+    let newFlashcards = this.state.flashcardList;
+    let currentCard = newFlashcards[this.state.index];
 
 
     return (
