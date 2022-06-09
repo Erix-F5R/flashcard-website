@@ -152,11 +152,17 @@ class App extends Component {
     this.handleUserResponse = this.handleUserResponse.bind(this);
   }
 
+  //onclick next
   handleIndex(){
+    
+
     //this.setState correct_tally here
     this.setState({index: this.state.index+1})
   }
+
+  //onclick masc or fem
   handleUserResponse(correct){
+    
     let card = this.state.flashcardList[this.state.index]
     
     if(correct){
@@ -165,12 +171,14 @@ class App extends Component {
     else{
       card.incorrect_tally = card.incorrect_tally + 1
     }
+    //put tally to card in django DB
     axios
         .put(`/api/flashcards/${card.id}/`, card)
         .then((res) => this.refreshList());
-        //let flashcardList = await this.refreshList();
-        //window.localStorage.setItem('deck',JSON.stringify(flashcardList)) //set Deck to local Strg
-        //this.setState({flashcardList})
+    //update local storage    
+    window.localStorage.setItem('deck',JSON.stringify(this.state.flashcardList)) //set Deck to local Strg
+        
+    
   }
   
   //Do I need this method or can it just be in Render?
