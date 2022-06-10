@@ -3,10 +3,11 @@ import axios from "axios";
 
 class Leaderboard extends React.Component {
   lbrenderList() {
-    let list = this.props.leaderboardList.filter(
-      (item) => item.incorrect_tally > 0
-    );
-
+    let list = this.props.leaderboardList
+      .filter((item) => item.incorrect_tally > 0)
+      .sort(function (a, b) {
+        return b.incorrect_tally - a.incorrect_tally;
+      });
     return list.map((card) => (
       <li key={card.id}>
         {card.word} {card.incorrect_tally}
@@ -157,7 +158,6 @@ class App extends Component {
 
   //onclick next
   handleIndex() {
-    console.log("next", this.state.leaderboardList[0]);
     //this.setState correct_tally here
     this.state.flashcardList.shift();
     window.localStorage.setItem(
@@ -167,14 +167,32 @@ class App extends Component {
 
     //this is only to force the render method to rerun
     //this.setState({ index: this.state.index + 1 });
-    this.forceUpdate()
-    if (this.state.flashcardList.length === 0 ){
+    this.forceUpdate();
+
+    if (this.state.flashcardList.length === 0) {
       this.shuffle();
-    } 
+    }
   }
 
-  shuffle(){
-    
+  shuffle() {
+    window.localStorage.removeItem("deck");
+    this.fetchDecks();
+  }
+
+  //Fisher-Yates Shuffle https://bost.ocks.org/mike/shuffle/
+  shuffleArray(array) {
+    let m = array.length,
+      t,
+      i;
+
+    while (m) {
+      i = Math.floor(Math.random() * m--);
+
+      t = array[m];
+      array[m] = array[i];
+      array[i] = t;
+    }
+    return array;
   }
   //onclick masc or fem
   handleUserResponse(correct) {
@@ -211,15 +229,13 @@ class App extends Component {
     );
   };
 
-  async componentDidMount() {
-    console.log("1");
-
+  async fetchDecks() {
     let localStorageDeck = window.localStorage.getItem("deck");
     let backendDeck = await this.refreshList();
 
     //if No deck in local aka first time loading
     if (localStorageDeck === null) {
-      let flashcardList = backendDeck.slice();
+      let flashcardList = this.shuffleArray(backendDeck.slice());
       let leaderboardList = backendDeck.slice();
 
       window.localStorage.setItem("deck", JSON.stringify(flashcardList)); //set Deck to local Strg
@@ -230,6 +246,10 @@ class App extends Component {
       this.setState({ flashcardList: JSON.parse(localStorageDeck) }); //setState(flashcardList: local)
       this.setState({ leaderboardList: backendDeck.slice() });
     }
+  }
+
+  componentDidMount() {
+    this.fetchDecks();
   }
 
   refreshList = async () => {
@@ -244,6 +264,7 @@ class App extends Component {
     if (this.state.flashcardList.length === 0) {
       return null;
     }
+
     return (
       <main className="container">
         <ul>{this.renderFlashcard()}</ul>
