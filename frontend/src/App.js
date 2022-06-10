@@ -2,9 +2,10 @@ import React, { Component } from "react";
 import axios from "axios";
 
 class Leaderboard extends React.Component{
+  
 
   renderList(){
-    let list =  this.props.flashcardList.filter(item => item.incorrect_tally > 0);
+    let list =  this.props.leaderboardList.filter(item => item.incorrect_tally > 0);
     
     return list.map((card) => <li key={card.id}>{card.word}  {card.incorrect_tally}</li>)
     
@@ -146,6 +147,7 @@ class App extends Component {
     super(props);
     this.state = {
       flashcardList: [],
+      leaderboardList: [],
       index: 0,
     };
     this.handleIndex = this.handleIndex.bind(this);
@@ -158,6 +160,9 @@ class App extends Component {
     let flashcardList = this.state.flashcardList
     flashcardList.shift()
     window.localStorage.setItem('deck',JSON.stringify(this.state.flashcardList))
+    
+    //this is only to force the render method to rerun
+    this.setState({index: this.state.index+1})
     
   }
 
@@ -187,7 +192,7 @@ class App extends Component {
 
 
     let newFlashcards = this.state.flashcardList;
-    let currentCard = newFlashcards[this.state.index];
+    let currentCard = newFlashcards[0];
 
 
     return (
@@ -200,13 +205,14 @@ class App extends Component {
 
   async componentDidMount() {
 
-    let localDeck = window.localStorage.getItem('deck')    
+    let localDeck = window.localStorage.getItem('deck')
+    let leaderboardList = await this.refreshList();    
 
     //if No deck in local
     if( localDeck === null){
-      let flashcardList = await this.refreshList();
+      let flashcardList = leaderboardList;
       window.localStorage.setItem('deck',JSON.stringify(flashcardList)) //set Deck to local Strg
-      this.setState({flashcardList})
+      this.setState({flashcardList, leaderboardList})
     }
     //if deck exists
     else{
@@ -230,7 +236,7 @@ class App extends Component {
     return (
       <main className="container">
         <ul>{this.renderFlashcard()}</ul>
-        <Leaderboard flashcardList={this.state.flashcardList}/>
+        <Leaderboard leaderboardList={this.state.leaderboardList}/>
       </main>
     );
   }
