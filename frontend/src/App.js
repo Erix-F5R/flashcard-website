@@ -4,7 +4,7 @@ import axios from "axios";
 class Leaderboard extends React.Component{
   
 
-  renderList(){
+  lbrenderList(){
     let list =  this.props.leaderboardList.filter(item => item.incorrect_tally > 0);
     
     return list.map((card) => <li key={card.id}>{card.word}  {card.incorrect_tally}</li>)
@@ -12,7 +12,7 @@ class Leaderboard extends React.Component{
   }
 
   render(){
-    return(<div>LEADERBOARD<ul>{this.renderList()}</ul></div>
+    return(<div>LEADERBOARD<ul>{this.lbrenderList()}</ul></div>
             
     );
 
@@ -156,9 +156,9 @@ class App extends Component {
 
   //onclick next
   handleIndex(){
+    console.log('next')
     //this.setState correct_tally here
-    let flashcardList = this.state.flashcardList
-    flashcardList.shift()
+    this.state.flashcardList.shift()
     window.localStorage.setItem('deck',JSON.stringify(this.state.flashcardList))
     
     //this is only to force the render method to rerun
@@ -168,7 +168,7 @@ class App extends Component {
 
   //onclick masc or fem
   handleUserResponse(correct){
-    
+    console.log('m/f')
     let card = this.state.flashcardList[0]
     
     if(correct){
@@ -205,18 +205,25 @@ class App extends Component {
 
   async componentDidMount() {
 
-    let localDeck = window.localStorage.getItem('deck')
-    let leaderboardList = await this.refreshList();    
+    console.log('1')
 
-    //if No deck in local
-    if( localDeck === null){
-      let flashcardList = leaderboardList;
+    let localStorageDeck = window.localStorage.getItem('deck')
+    let backendDeck = await this.refreshList();    
+        
+    //if No deck in local aka first time loading
+    if( localStorageDeck === null){
+      let flashcardList = backendDeck.slice();
+      let leaderboardList = backendDeck.slice();
+      
       window.localStorage.setItem('deck',JSON.stringify(flashcardList)) //set Deck to local Strg
-      this.setState({flashcardList, leaderboardList})
+      this.setState({leaderboardList,flashcardList})
+      
     }
     //if deck exists
     else{
-      this.setState({flashcardList: JSON.parse(localDeck)})//setState(flashcardList: local) 
+     
+      this.setState({flashcardList: JSON.parse(localStorageDeck)})//setState(flashcardList: local) 
+      this.setState({leaderboardList: backendDeck})
     }
     
   }
