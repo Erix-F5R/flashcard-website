@@ -156,7 +156,7 @@ class App extends Component {
 
   //onclick next
   handleIndex(){
-    console.log('next')
+    console.log('next', this.state.leaderboardList[0])
     //this.setState correct_tally here
     this.state.flashcardList.shift()
     window.localStorage.setItem('deck',JSON.stringify(this.state.flashcardList))
@@ -170,20 +170,28 @@ class App extends Component {
   handleUserResponse(correct){
     console.log('m/f')
     let card = this.state.flashcardList[0]
+    let lbCard = this.state.leaderboardList.find((item) => item.id === card.id);
     
     if(correct){
-      card.correct_tally = card.correct_tally + 1  
+      card.correct_tally = card.correct_tally + 1
+      lbCard.correct_tally = lbCard.correct_tally + 1  
+      //card.correct_tally = 0
+      //card.incorrect_tally = 0 
+      
     }
     else{
       card.incorrect_tally = card.incorrect_tally + 1
+      lbCard.incorrect_tally = lbCard.incorrect_tally + 1
+      //card.correct_tally = 0
+      //card.incorrect_tally = 0
     }
     //put tally to card in django DB
-    axios
-        .put(`/api/flashcards/${card.id}/`, card)
-        .then((res) => this.refreshList());
+    axios.put(`/api/flashcards/${card.id}/`, card);
     //update local storage    
     window.localStorage.setItem('deck',JSON.stringify(this.state.flashcardList)) //set Deck to local Strg
-        
+    
+    
+    
     
   }
   
@@ -223,7 +231,7 @@ class App extends Component {
     else{
      
       this.setState({flashcardList: JSON.parse(localStorageDeck)})//setState(flashcardList: local) 
-      this.setState({leaderboardList: backendDeck})
+      this.setState({leaderboardList: backendDeck.slice()})
     }
     
   }
