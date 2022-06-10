@@ -1,21 +1,25 @@
 import React, { Component } from "react";
 import axios from "axios";
 
-class Leaderboard extends React.Component{
-  
-
-  lbrenderList(){
-    let list =  this.props.leaderboardList.filter(item => item.incorrect_tally > 0);
-    
-    return list.map((card) => <li key={card.id}>{card.word}  {card.incorrect_tally}</li>)
-    
-  }
-
-  render(){
-    return(<div>LEADERBOARD<ul>{this.lbrenderList()}</ul></div>
-            
+class Leaderboard extends React.Component {
+  lbrenderList() {
+    let list = this.props.leaderboardList.filter(
+      (item) => item.incorrect_tally > 0
     );
 
+    return list.map((card) => (
+      <li key={card.id}>
+        {card.word} {card.incorrect_tally}
+      </li>
+    ));
+  }
+
+  render() {
+    return (
+      <div>
+        LEADERBOARD<ul>{this.lbrenderList()}</ul>
+      </div>
+    );
   }
 }
 
@@ -58,7 +62,7 @@ class GenderButton extends React.Component {
   }
 }
 
-class NextButton extends React.Component{
+class NextButton extends React.Component {
   constructor(props) {
     super(props);
     this.handleClick = this.handleClick.bind(this);
@@ -78,8 +82,6 @@ class NextButton extends React.Component{
       </button>
     );
   }
-
-
 }
 
 class Card extends React.Component {
@@ -96,13 +98,12 @@ class Card extends React.Component {
 
   handleUserResponse(MorF) {
     this.setState({ answerGiven: true, userResponse: MorF });
-    this.props.userResponse(MorF == this.state.answer)
-
+    this.props.userResponse(MorF == this.state.answer);
   }
 
-  handleNextClicked(){
+  handleNextClicked() {
     this.setState({ answerGiven: false, userResponse: null });
-    this.props.index()
+    this.props.index();
   }
 
   render() {
@@ -155,85 +156,80 @@ class App extends Component {
   }
 
   //onclick next
-  handleIndex(){
-    console.log('next', this.state.leaderboardList[0])
+  handleIndex() {
+    console.log("next", this.state.leaderboardList[0]);
     //this.setState correct_tally here
-    this.state.flashcardList.shift()
-    window.localStorage.setItem('deck',JSON.stringify(this.state.flashcardList))
-    
+    this.state.flashcardList.shift();
+    window.localStorage.setItem(
+      "deck",
+      JSON.stringify(this.state.flashcardList)
+    );
+
     //this is only to force the render method to rerun
-    this.setState({index: this.state.index+1})
-    
+    //this.setState({ index: this.state.index + 1 });
+    this.forceUpdate()
+    if (this.state.flashcardList.length === 0 ){
+      this.shuffle();
+    } 
   }
 
-  //onclick masc or fem
-  handleUserResponse(correct){
-    console.log('m/f')
-    let card = this.state.flashcardList[0]
-    let lbCard = this.state.leaderboardList.find((item) => item.id === card.id);
+  shuffle(){
     
-    if(correct){
-      card.correct_tally = card.correct_tally + 1
-      lbCard.correct_tally = lbCard.correct_tally + 1  
-      //card.correct_tally = 0
-      //card.incorrect_tally = 0 
-      
-    }
-    else{
-      card.incorrect_tally = card.incorrect_tally + 1
-      lbCard.incorrect_tally = lbCard.incorrect_tally + 1
-      //card.correct_tally = 0
-      //card.incorrect_tally = 0
+  }
+  //onclick masc or fem
+  handleUserResponse(correct) {
+    let card = this.state.flashcardList[0];
+    let lbCard = this.state.leaderboardList.find((item) => item.id === card.id);
+
+    if (correct) {
+      lbCard.correct_tally = lbCard.correct_tally + 1;
+    } else {
+      lbCard.incorrect_tally = lbCard.incorrect_tally + 1;
     }
     //put tally to card in django DB
-    axios.put(`/api/flashcards/${card.id}/`, card);
-    //update local storage    
-    window.localStorage.setItem('deck',JSON.stringify(this.state.flashcardList)) //set Deck to local Strg
-    
-    
-    
-    
+    axios.put(`/api/flashcards/${card.id}/`, lbCard);
+    //update local storage
+    window.localStorage.setItem(
+      "deck",
+      JSON.stringify(this.state.flashcardList)
+    ); //set Deck to local Strg
   }
-  
+
   //Do I need this method or can it just be in Render?
   renderFlashcard = () => {
-
-
     let newFlashcards = this.state.flashcardList;
     let currentCard = newFlashcards[0];
 
-
     return (
       <li key={currentCard.id}>
-        <Card index={this.handleIndex} flashcard={currentCard} userResponse={this.handleUserResponse} />        
+        <Card
+          index={this.handleIndex}
+          flashcard={currentCard}
+          userResponse={this.handleUserResponse}
+        />
       </li>
     );
-
-  };  
+  };
 
   async componentDidMount() {
+    console.log("1");
 
-    console.log('1')
+    let localStorageDeck = window.localStorage.getItem("deck");
+    let backendDeck = await this.refreshList();
 
-    let localStorageDeck = window.localStorage.getItem('deck')
-    let backendDeck = await this.refreshList();    
-        
     //if No deck in local aka first time loading
-    if( localStorageDeck === null){
+    if (localStorageDeck === null) {
       let flashcardList = backendDeck.slice();
       let leaderboardList = backendDeck.slice();
-      
-      window.localStorage.setItem('deck',JSON.stringify(flashcardList)) //set Deck to local Strg
-      this.setState({leaderboardList,flashcardList})
-      
+
+      window.localStorage.setItem("deck", JSON.stringify(flashcardList)); //set Deck to local Strg
+      this.setState({ leaderboardList, flashcardList });
     }
     //if deck exists
-    else{
-     
-      this.setState({flashcardList: JSON.parse(localStorageDeck)})//setState(flashcardList: local) 
-      this.setState({leaderboardList: backendDeck.slice()})
+    else {
+      this.setState({ flashcardList: JSON.parse(localStorageDeck) }); //setState(flashcardList: local)
+      this.setState({ leaderboardList: backendDeck.slice() });
     }
-    
   }
 
   refreshList = async () => {
@@ -245,13 +241,13 @@ class App extends Component {
   };
 
   render() {
-    if(this.state.flashcardList.length === 0){
+    if (this.state.flashcardList.length === 0) {
       return null;
     }
     return (
       <main className="container">
         <ul>{this.renderFlashcard()}</ul>
-        <Leaderboard leaderboardList={this.state.leaderboardList}/>
+        <Leaderboard leaderboardList={this.state.leaderboardList} />
       </main>
     );
   }
