@@ -20,7 +20,7 @@ const CardBack = ({ currentCard, handleClick, grade }) => {
         Next Card
       </Button>
       <Definition>{currentCard.definition}</Definition>
-      <Anchor href={currentCard.link}>Learn more at wikitionary.org</Anchor>
+      <Anchor href={currentCard.link} target="_blank">Learn more at wikitionary.org</Anchor>
     </Wrapper>
   );
 };
