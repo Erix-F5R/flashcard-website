@@ -6,7 +6,9 @@ const Leaderboard = ({ deck }) => {
     return Math.floor((incor / (cor + incor)) * 100);
   };
 
-  const order = deck.sort(
+  const noNaN = deck.filter(card => card.incorrect_tally > 2)
+
+  const order = noNaN.sort(
     (a, b) =>
       failRate(a.correct_tally, a.incorrect_tally) <
       failRate(b.correct_tally, b.incorrect_tally)
@@ -14,15 +16,22 @@ const Leaderboard = ({ deck }) => {
 
   return (
     <Wrapper>
-    
-    <RowHeader><Entry>Most difficult nouns</Entry> <Rate>(Fail Rate)</Rate></RowHeader>
-      {order.map((card, index) => (
-        <Row>
-          <Entry>{index + 1}. {card.word} </Entry>
-          <Div>.......</Div>
-          <Rate> {failRate(card.correct_tally, card.incorrect_tally)}%</Rate>
-        </Row>
-      ))}
+      <RowHeader>
+        <Entry>Most difficult nouns</Entry> <Rate>(Fail Rate)</Rate>
+      </RowHeader>
+      {order.map((card, index) =>
+        index < 25 ? (
+          <Row>
+            <Entry>
+              {index + 1}. {card.word}{" "}
+            </Entry>
+            <Div>.......</Div>
+            <Rate> {failRate(card.correct_tally, card.incorrect_tally)}%</Rate>
+          </Row>
+        ) : (
+          ""
+        )
+      )}
     </Wrapper>
   );
 };
@@ -44,7 +53,6 @@ const RowHeader = styled(Row)`
   border-bottom: 3px solid lightgrey;
 `;
 
-
 const Entry = styled.div``;
 
 const Rate = styled.div``;
@@ -54,8 +62,6 @@ const Div = styled.div`
   flex-grow: 2;
   text-align: right;
   padding-right: 72px;
-
-  
 `;
 
 export default Leaderboard;

@@ -3,7 +3,8 @@ import csv
 
 header = True
 
-with open('deck.csv') as f:
+
+with open('morecards.csv') as f:
     reader = csv.reader(f, delimiter=';')
     for row in reader:
         if header:

@@ -30,6 +30,8 @@ const Card = ({ currentCard, handleClick }) => {
 const Wrapper = styled.div`
   width: 600px;
   height: 500px;
+  border: 2px solid lightgrey;
+  border-radius: 3px;
   display: flex;
   flex-direction: column;
   align-items: center;
