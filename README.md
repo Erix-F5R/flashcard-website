@@ -1,5 +1,5 @@
 # Flash Card Website using Django and React
-<img src='Fullscreen.gif' style='width:50%' />
+<img src='Fullscreen.gif' style='width:100%' />
 
 This website tests users on the genders of the most common french nouns. 
 
